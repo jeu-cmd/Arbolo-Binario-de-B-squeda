@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Árbol Binario de Búsqueda</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+<!-- Iconos reutilizables -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9-5.5z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></symbol>
+  <symbol id="i-resume" viewBox="0 0 16 16"><path d="M2.5 2.5h2v11h-2zM6.5 2.5v11l8-5.5z"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 16 16"><path d="M3 2.5h2v11H3zM13.5 2.5v11L6 8z"/></symbol>
+  <symbol id="i-next" viewBox="0 0 16 16"><path d="M11 2.5h2v11h-2zM2.5 2.5v11L10 8z"/></symbol>
+  <symbol id="i-end" viewBox="0 0 16 16"><path d="M1.5 3v10L7 8zM7 3v10l5.5-5zM13 3h2v10h-2z"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 16 16"><path d="M13 8a5 5 0 1 1-1.6-3.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M13.6 1.6v4.3H9.3z"/></symbol>
+  <symbol id="i-arbol" viewBox="0 0 16 16"><path d="M8 5 4 11M8 5l4 6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="3.5" r="2.2"/><circle cx="4" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/></symbol>
+  <symbol id="i-libro" viewBox="0 0 16 16"><path d="M1.5 3.2C4 2.3 6.3 2.5 8 3.9c1.7-1.4 4-1.6 6.5-.7v9.3c-2.5-.9-4.8-.7-6.5.7-1.7-1.4-4-1.6-6.5-.7zM8 3.9v9.3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
+  <symbol id="i-codigo" viewBox="0 0 16 16"><path d="M5.5 4 2 8l3.5 4M10.5 4 14 8l-3.5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="app">
+
+  <!-- ===================== BARRA LATERAL ===================== -->
+  <aside class="lateral">
+    <div class="marca">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M16 9 8 22M16 9l8 13" stroke="#8ea0c8" stroke-width="2" fill="none"/>
+        <circle cx="16" cy="8" r="5" fill="#f59e0b"/>
+        <circle cx="8" cy="23" r="4.5" fill="#fff"/>
+        <circle cx="24" cy="23" r="4.5" fill="#fff"/>
+      </svg>
+      <span>ABB Visual</span>
+    </div>
+    <nav class="menu" aria-label="Secciones">
+      <button type="button" class="menu-item activo" data-vista="arbol" aria-current="page"><svg aria-hidden="true" fill="currentColor"><use href="#i-arbol"/></svg>Árbol ABB</button>
+      <button type="button" class="menu-item" data-vista="teoria" aria-current="false"><svg aria-hidden="true" fill="currentColor"><use href="#i-libro"/></svg>¿Qué es un ABB?</button>
+      <button type="button" class="menu-item" data-vista="ayuda" aria-current="false"><svg aria-hidden="true" fill="currentColor"><use href="#i-codigo"/></svg>Ayuda y algoritmos</button>
+    </nav>
+    <p class="pie-lateral">Matemática Discreta<br>Proyecto final</p>
+  </aside>
+
+  <div class="principal">
+
+    <!-- ===================== BARRA SUPERIOR ===================== -->
+    <header class="barra">
+      <h1>Árbol Binario de Búsqueda</h1>
+      <div class="barra-datos">
+        <span class="chip-estado" id="chip-estado" data-tono="neutro"><i class="punto"></i><span id="estado-texto">Esperando datos</span></span>
+        <span class="contador">Nodos<b id="top-nodos">0</b></span>
+      </div>
+    </header>
+
+    <main class="contenido">
+
+      <!-- ===================== SECCIÓN: ÁRBOL ABB ===================== -->
+      <section class="vista vista-arbol" id="vista-arbol" aria-label="Árbol ABB">
+
+        <div class="panel entrada">
+          <label for="entrada">Números de entrada</label>
+          <textarea id="entrada" rows="2" spellcheck="false" placeholder="Ej.: 50, 30, 70, 20, 40, 60, 80"></textarea>
+          <div class="entrada-botones">
+            <button type="button" class="btn btn-primario" id="btn-construir">Construir árbol</button>
+            <button type="button" class="btn" id="btn-limpiar">Limpiar</button>
+          </div>
+          <p class="pista" id="pista">Enteros separados por comas, espacios, saltos de línea o punto y coma. Mínimo 2 números distintos; si repites uno, se toma una sola vez.</p>
+          <div class="alerta" id="alerta" role="alert" hidden>
+            <ul id="alerta-lista"></ul>
+            <button type="button" class="alerta-cerrar" id="alerta-cerrar" aria-label="Cerrar mensaje">×</button>
+          </div>
+        </div>
+
+        <div class="centro">
+
+          <!-- Árbol -->
+          <section class="panel panel-arbol" aria-labelledby="t-arbol">
+            <div class="panel-cab">
+              <h2 id="t-arbol">Visualización del árbol</h2>
+              <dl class="metricas">
+                <div><dt>Raíz</dt><dd id="m-raiz">—</dd></div>
+                <div><dt>Nodos</dt><dd id="m-nodos">0</dd></div>
+                <div><dt>Altura</dt><dd id="m-altura">0</dd></div>
+              </dl>
+            </div>
+            <div class="marco">
+              <div class="lienzo" id="lienzo">
+                <svg id="svg-arbol" class="oculto" role="img" aria-label="Árbol binario de búsqueda dibujado con SVG"></svg>
+              </div>
+              <p class="vacio" id="arbol-vacio">El árbol está vacío. Escribe números y pulsa «Construir árbol».</p>
+              <div class="aviso" id="aviso" hidden></div>
+            </div>
+            <ul class="leyenda" aria-label="Leyenda de colores">
+              <li><i class="muestra"></i>Nodo</li>
+              <li><i class="muestra m-nuevo"></i>Insertando</li>
+              <li><i class="muestra m-compara"></i>Comparando</li>
+              <li><i class="muestra m-visita"></i>Visitando</li>
+              <li><i class="muestra m-visitado"></i>Visitado</li>
+              <li><i class="muestra m-pendiente"></i>Pendiente</li>
+            </ul>
+          </section>
+
+          <!-- Controles de animación -->
+          <div class="controles">
+
+            <section class="panel animacion" aria-labelledby="t-insercion">
+              <div class="panel-cab">
+                <h2 id="t-insercion">Animación de inserción</h2>
+                <label class="velocidad">Velocidad
+                  <select id="ins-vel">
+                    <option value="1600">Lenta</option>
+                    <option value="1000" selected>Normal</option>
+                    <option value="550">Rápida</option>
+                    <option value="250">Muy rápida</option>
+                  </select>
+                </label>
+              </div>
+              <div class="seguimiento">
+                <span class="pildora" id="ins-pildora" data-tono="neutro">Sin datos</span>
+                <span class="paso" id="ins-paso">Sin pasos</span>
+                <div class="barra-progreso"><i id="ins-barra"></i></div>
+              </div>
+              <div class="botones">
+                <button type="button" class="btn btn-primario" id="ins-reproducir"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Reproducir</button>
+                <button type="button" class="btn" id="ins-pausar"><svg class="ico" aria-hidden="true"><use href="#i-pause"/></svg>Pausar</button>
+                <button type="button" class="btn" id="ins-continuar"><svg class="ico" aria-hidden="true"><use href="#i-resume"/></svg>Continuar</button>
+                <button type="button" class="btn" id="ins-reiniciar"><svg class="ico" aria-hidden="true"><use href="#i-reset"/></svg>Reiniciar</button>
+                <span class="salto"></span>
+                <button type="button" class="btn" id="ins-anterior"><svg class="ico" aria-hidden="true"><use href="#i-prev"/></svg>Paso anterior</button>
+                <button type="button" class="btn" id="ins-siguiente"><svg class="ico" aria-hidden="true"><use href="#i-next"/></svg>Siguiente paso</button>
+                <button type="button" class="btn" id="ins-completo" title="Mostrar árbol completo"><svg class="ico" aria-hidden="true"><use href="#i-end"/></svg>Mostrar<span class="largo"> árbol</span> completo</button>
+              </div>
+            </section>
+
+            <section class="panel animacion" aria-labelledby="t-inorden">
+              <div class="panel-cab">
+                <h2 id="t-inorden">Recorrido Inorden</h2>
+                <label class="velocidad">Velocidad
+                  <select id="ino-vel">
+                    <option value="1600">Lenta</option>
+                    <option value="1000" selected>Normal</option>
+                    <option value="550">Rápida</option>
+                    <option value="250">Muy rápida</option>
+                  </select>
+                </label>
+              </div>
+              <div class="seguimiento">
+                <span class="pildora" id="ino-pildora" data-tono="neutro">Espera la inserción</span>
+                <span class="paso" id="ino-paso">Sin pasos</span>
+                <div class="barra-progreso"><i id="ino-barra"></i></div>
+              </div>
+              <div class="botones">
+                <button type="button" class="btn btn-primario" id="ino-reproducir"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg>Ejecutar Inorden</button>
+                <button type="button" class="btn" id="ino-pausar"><svg class="ico" aria-hidden="true"><use href="#i-pause"/></svg>Pausar</button>
+                <button type="button" class="btn" id="ino-continuar"><svg class="ico" aria-hidden="true"><use href="#i-resume"/></svg>Continuar</button>
+                <button type="button" class="btn" id="ino-reiniciar"><svg class="ico" aria-hidden="true"><use href="#i-reset"/></svg>Reiniciar</button>
+                <span class="salto"></span>
+                <button type="button" class="btn" id="ino-anterior"><svg class="ico" aria-hidden="true"><use href="#i-prev"/></svg>Paso anterior</button>
+                <button type="button" class="btn" id="ino-siguiente"><svg class="ico" aria-hidden="true"><use href="#i-next"/></svg>Siguiente paso</button>
+                <button type="button" class="btn" id="ino-completo" title="Mostrar recorrido completo"><svg class="ico" aria-hidden="true"><use href="#i-end"/></svg>Mostrar<span class="largo"> recorrido</span> completo</button>
+              </div>
+            </section>
+
+          </div>
+        </div>
+
+        <!-- Resultados -->
+        <section class="panel resultados" aria-label="Resultados">
+          <div class="celda">
+            <h3>Resultado Inorden</h3>
+            <p class="secuencia" id="res-inorden">—</p>
+          </div>
+          <div class="celda">
+            <h3>Estado del recorrido</h3>
+            <p id="res-estado">Sin iniciar</p>
+          </div>
+          <div class="celda">
+            <h3>Última comparación</h3>
+            <p class="comparacion" id="res-comparacion">—</p>
+          </div>
+          <div class="celda" aria-live="polite">
+            <h3>Operación actual</h3>
+            <p id="res-mensaje">Escribe los números y pulsa «Construir árbol».</p>
+          </div>
+        </section>
+
+      </section>
+
+      <!-- ===================== SECCIÓN: ¿QUÉ ES UN ABB? ===================== -->
+      <section class="vista vista-teoria" id="vista-teoria" aria-label="¿Qué es un ABB?" hidden>
+        <div class="teoria">
+
+          <article class="tarjeta">
+            <h2>¿Qué es un Árbol Binario de Búsqueda?</h2>
+            <p>Un <b>Árbol Binario de Búsqueda (ABB)</b> es una estructura de datos jerárquica formada por <b>nodos</b> conectados. Cada nodo guarda un valor y puede tener, como máximo, dos hijos.</p>
+            <p>Lo que lo hace «de búsqueda» es una regla de orden: en cada nodo, todos los valores de su <b>subárbol izquierdo son menores</b> y todos los de su <b>subárbol derecho son mayores</b>. En este proyecto, si se escribe un valor repetido, se toma una sola vez.</p>
+            <p>Gracias a esa regla, para insertar o buscar un número basta con seguir un solo camino desde la raíz: en cada comparación se descarta uno de los dos subárboles.</p>
+          </article>
+
+          <article class="tarjeta">
+            <h2>Partes de un árbol</h2>
+            <dl class="glosario">
+              <dt>Nodo</dt><dd>Elemento que guarda un valor y los enlaces a sus hijos.</dd>
+              <dt>Raíz</dt><dd>Primer nodo del árbol (el primer número ingresado). No tiene padre.</dd>
+              <dt>Hijo izquierdo</dt><dd>Nodo que cuelga a la izquierda; su valor es menor que el de su padre.</dd>
+              <dt>Hijo derecho</dt><dd>Nodo que cuelga a la derecha; su valor es mayor que el de su padre.</dd>
+              <dt>Hoja</dt><dd>Nodo que no tiene hijos.</dd>
+              <dt>Subárbol</dt><dd>Un nodo junto con todos sus descendientes; también es un ABB.</dd>
+            </dl>
+          </article>
+
+          <article class="tarjeta">
+            <h2>Cómo se insertan los números</h2>
+            <ol>
+              <li>El primer número ingresado se convierte en la raíz.</li>
+              <li>Cada número nuevo se compara con la raíz: si es menor, se va a la izquierda; si es mayor, a la derecha.</li>
+              <li>En el hijo elegido se repite la comparación, nivel por nivel.</li>
+              <li>Cuando el hijo elegido no existe, ahí se coloca el nodo nuevo.</li>
+            </ol>
+            <p>Los números se insertan en el orden en que se escriben: los mismos números en otro orden producen otro árbol.</p>
+            <figure class="figura">
+              <svg id="svg-ej-principal" role="img" aria-label="Árbol de ejemplo con la raíz 50"></svg>
+              <figcaption>Entrada 50, 30, 70, 20, 40, 60, 80. En ámbar, el camino que siguió el 40; en violeta, el nodo nuevo.</figcaption>
+            </figure>
+            <p><b>Comparaciones al insertar el 40:</b> 40 &lt; 50, va a la izquierda (hasta el 30). 40 &gt; 30, va a la derecha. Como el 30 no tiene hijo derecho, el 40 queda como hijo derecho del 30.</p>
+          </article>
+
+          <article class="tarjeta">
+            <h2>Recorrer un árbol</h2>
+            <p>Recorrer un árbol es visitar todos sus nodos, una sola vez cada uno, siguiendo un orden. Los recorridos en profundidad más conocidos son:</p>
+            <ul>
+              <li><b>Preorden:</b> Raíz → Izquierda → Derecha.</li>
+              <li><b>Inorden:</b> Izquierda → Raíz → Derecha.</li>
+              <li><b>Postorden:</b> Izquierda → Derecha → Raíz.</li>
+            </ul>
+            <p>Este proyecto utiliza el recorrido <b>Inorden</b>.</p>
+          </article>
+
+          <article class="tarjeta">
+            <h2>El recorrido Inorden</h2>
+            <p>Para cada nodo se hacen tres cosas, siempre en este orden:</p>
+            <ol>
+              <li>Recorrer su subárbol izquierdo.</li>
+              <li>Visitar el nodo (leer su valor).</li>
+              <li>Recorrer su subárbol derecho.</li>
+            </ol>
+            <p>La definición es recursiva: recorrer un subárbol vacío no hace nada. Con el árbol de ejemplo, el resultado es:</p>
+            <p class="recorrido">20 → 30 → 40 → 50 → 60 → 70 → 80</p>
+          </article>
+
+          <article class="tarjeta">
+            <h2>¿Por qué Inorden da valores ascendentes?</h2>
+            <p>Por la regla del ABB: todo lo que está a la izquierda de un nodo es menor que él y todo lo que está a la derecha es mayor.</p>
+            <p>El Inorden visita primero toda la izquierda (los menores), después el nodo y al final toda la derecha (los mayores). Como esto se cumple en cada subárbol, la lista completa sale de menor a mayor sin usar ninguna función de ordenamiento.</p>
+          </article>
+
+          <article class="tarjeta">
+            <h2>Altura del árbol</h2>
+            <p>La altura es la cantidad de niveles que hay desde la raíz hasta la hoja más lejana. En esta aplicación la raíz cuenta como nivel 1 (algunos textos cuentan aristas y obtienen un valor menos). El árbol del ejemplo tiene altura 3.</p>
+            <p class="formula">altura(vacío) = 0<br>altura(nodo) = 1 + máximo(altura(izquierdo), altura(derecho))</p>
+          </article>
+
+          <article class="tarjeta">
+            <h2>Árbol equilibrado o degenerado</h2>
+            <p>Un árbol está <b>equilibrado</b> cuando sus dos subárboles tienen alturas parecidas. Con n nodos, su altura es cercana a ⌈log₂(n + 1)⌉ y buscar o insertar es muy rápido.</p>
+            <p>Está <b>degenerado</b> cuando cada nodo tiene un solo hijo: se parece a una lista y su altura llega a n. Ocurre, por ejemplo, si se ingresan números que ya están ordenados.</p>
+            <figure class="figura">
+              <svg id="svg-ej-degenerado" role="img" aria-label="Árbol degenerado inclinado a la derecha"></svg>
+              <figcaption>Entrada 10, 20, 30, 40: árbol inclinado a la derecha (altura 4).</figcaption>
+            </figure>
+            <p>El ABB de este proyecto no se equilibra solo: su forma depende únicamente del orden de ingreso, y ambos casos son válidos.</p>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ===================== SECCIÓN: AYUDA Y ALGORITMOS ===================== -->
+      <section class="vista vista-ayuda" id="vista-ayuda" aria-label="Ayuda y algoritmos" hidden>
+
+        <nav class="ayuda-indice" aria-label="Bloques del código">
+          <h2>Bloques del código</h2>
+          <button type="button" class="ayuda-item activo" data-bloque="nodo" aria-current="true">1. La clase Nodo</button>
+          <button type="button" class="ayuda-item" data-bloque="arbol" aria-current="false">2. La clase ArbolABB</button>
+          <button type="button" class="ayuda-item" data-bloque="insertar" aria-current="false">3. El método de inserción</button>
+          <button type="button" class="ayuda-item" data-bloque="inorden" aria-current="false">4. El recorrido Inorden</button>
+          <button type="button" class="ayuda-item" data-bloque="pasos" aria-current="false">5. Pasos para la animación</button>
+          <button type="button" class="ayuda-item" data-bloque="dibujo" aria-current="false">6. El dibujo SVG</button>
+          <button type="button" class="ayuda-item" data-bloque="comunicacion" aria-current="false">7. Python, Flask y JavaScript</button>
+          <button type="button" class="ayuda-item" data-bloque="validacion" aria-current="false">8. La validación de datos</button>
+          <button type="button" class="ayuda-item" data-bloque="control" aria-current="false">9. Control de las animaciones</button>
+          <button type="button" class="ayuda-item" data-bloque="ascendente" aria-current="false">10. Resultado ascendente</button>
+        </nav>
+
+        <div class="ayuda-contenido">
+
+          <!-- 1. Nodo -->
+          <article class="bloque" id="bloque-nodo">
+            <h3>1. La clase Nodo</h3>
+            <p class="origen">Archivo arbol.py, clase Nodo</p>
+            <pre class="codigo"><code>{{ codigo.nodo }}</code></pre>
+            <div class="bloque-cols">
+              <section>
+                <h4>Qué hace</h4>
+                <p>Representa una «cajita» del árbol. Cada nodo guarda tres cosas: el número (<code>valor</code>) y dos enlaces que apuntan a otros nodos, el hijo izquierdo y el hijo derecho. Si un enlace vale <code>None</code>, ese hijo todavía no existe.</p>
+                <h4>Por qué es necesario</h4>
+                <p>Un árbol es un conjunto de nodos enlazados. Sin <code>Nodo</code> no habría dónde guardar los números ni cómo conectarlos; esos enlaces son las «ramas» que luego se dibujan.</p>
+              </section>
+              <section>
+                <h4>Instrucciones importantes</h4>
+                <ul class="lineas">
+                  <li><code>def __init__(self, valor):</code> se ejecuta al crear un nodo, por ejemplo <code>Nodo(50)</code>. Recibe el número que se guardará.</li>
+                  <li><code>self.valor = valor</code> guarda el número dentro del nodo.</li>
+                  <li><code>self.izquierdo = None</code> al principio no hay hijo izquierdo. Más adelante apuntará a un nodo con un valor MENOR.</li>
+                  <li><code>self.derecho = None</code> igual, pero para el hijo derecho, con un valor MAYOR.</li>
+                </ul>
+              </section>
+            </div>
+            <h4>Ejemplo de ejecución</h4>
+            <pre class="salida">Después de insertar 50, 30 y 70:
+
+Nodo(valor=50)
+ ├─ izquierdo → Nodo(valor=30)   (sus dos hijos valen None)
+ └─ derecho   → Nodo(valor=70)   (sus dos hijos valen None)</pre>
+            <div class="exposicion"><p>«Un Nodo es la unidad básica del árbol: guarda un número y dos enlaces, uno a su hijo izquierdo y otro a su hijo derecho. Al nacer no tiene hijos, por eso ambos enlaces valen None.»</p></div>
+          </article>
+
+          <!-- 2. ArbolABB -->
+          <article class="bloque" id="bloque-arbol" hidden>
+            <h3>2. La clase ArbolABB</h3>
+            <p class="origen">Archivo arbol.py, clase ArbolABB</p>
+            <pre class="codigo"><code>{{ codigo.arbol }}</code></pre>
+            <div class="bloque-cols">
+              <section>
+                <h4>Qué hace</h4>
+                <p>Representa el árbol completo. Solo guarda un dato: la raíz (el primer nodo). Desde la raíz se puede llegar a cualquier otro nodo siguiendo los enlaces izquierdo y derecho. Todos los algoritmos del proyecto son métodos de esta clase.</p>
+                <h4>Por qué es necesario</h4>
+                <p>Separar el árbol (<code>ArbolABB</code>) de sus nodos (<code>Nodo</code>) mantiene el código ordenado: el árbol sabe qué hacer (insertar, recorrer, contar) y cada nodo solo guarda datos.</p>
+              </section>
+              <section>
+                <h4>Instrucciones importantes</h4>
+                <ul class="lineas">
+                  <li><code>class ArbolABB:</code> define el árbol como una clase: un molde con datos y métodos.</li>
+                  <li><code>self.raiz = None</code> un árbol nuevo está vacío. Al insertar el primer valor, <code>raiz</code> apuntará a ese nodo.</li>
+                </ul>
+                <h4>Métodos de la clase</h4>
+                <table class="metodos">
+                  <tr><td><code>insertar(valor)</code></td><td>coloca un número en su lugar y devuelve los pasos (bloque 3)</td></tr>
+                  <tr><td><code>construir(valores)</code></td><td>inserta la lista completa, respetando el orden de entrada</td></tr>
+                  <tr><td><code>buscar(valor)</code></td><td>sigue el mismo camino que la inserción; devuelve True o False</td></tr>
+                  <tr><td><code>inorden()</code></td><td>lista de valores en orden ascendente (bloque 4)</td></tr>
+                  <tr><td><code>generar_pasos_inorden()</code></td><td>eventos para animar el recorrido (bloque 5)</td></tr>
+                  <tr><td><code>contar_nodos()</code></td><td>cantidad de nodos</td></tr>
+                  <tr><td><code>calcular_altura()</code></td><td>número de niveles</td></tr>
+                  <tr><td><code>obtener_nodos()</code></td><td>datos de cada nodo para dibujar (bloque 6)</td></tr>
+                </table>
+              </section>
+            </div>
+            <h4>Ejemplo de ejecución</h4>
+            <pre class="salida">Árbol construido con 50, 30, 70, 20, 40, 60, 80:
+{{ ejemplo.resumen }}</pre>
+            <div class="exposicion"><p>«ArbolABB solo recuerda la raíz. Todo lo demás se alcanza desde ella, y en esa clase están los métodos que insertan, recorren y calculan.»</p></div>
+          </article>
+
+          <!-- 3. Inserción -->
+          <article class="bloque" id="bloque-insertar" hidden>
+            <h3>3. El método de inserción</h3>
+            <p class="origen">Archivo arbol.py, método ArbolABB.insertar</p>
+            <pre class="codigo"><code>{{ codigo.insertar }}</code></pre>
+            <div class="bloque-cols">
+              <section>
+                <h4>Qué hace</h4>
+                <p>Coloca un número nuevo en el lugar correcto. Si el árbol está vacío, el número es la raíz. Si no, empieza en la raíz y compara: si el número es menor, baja por la izquierda; si es mayor, baja por la derecha. Repite hasta encontrar un hueco (un hijo que vale <code>None</code>) y ahí crea el nodo.</p>
+                <p>Además devuelve la lista <code>pasos</code> con cada comparación, que es lo que usa la animación.</p>
+                <h4>Por qué es necesario</h4>
+                <p>Es la regla que define a un ABB: menores a la izquierda y mayores a la derecha. Como <code>construir()</code> inserta los números en el orden en que los escribió el usuario, el árbol queda exactamente como lo pide el proyecto.</p>
+              </section>
+              <section>
+                <h4>Instrucciones importantes</h4>
+                <ul class="lineas">
+                  <li><code>if self.raiz is None:</code> pregunta si el árbol está vacío.</li>
+                  <li><code>self.raiz = Nodo(valor)</code> crea el primer nodo y lo deja como raíz.</li>
+                  <li><code>actual = self.raiz</code> empezamos a bajar desde la raíz; <code>actual</code> es el nodo con el que se compara.</li>
+                  <li><code>while True:</code> se repite una vez por cada nivel que se baja. Termina con <code>return pasos</code>.</li>
+                  <li><code>if valor &lt; actual.valor:</code> si es menor, el camino sigue por la izquierda.</li>
+                  <li><code>elif valor &gt; actual.valor:</code> si es mayor, sigue por la derecha.</li>
+                  <li><code>raise ValueError(f"El valor {valor} ya existe en el árbol.")</code> si son iguales se detiene con un error: el árbol nunca guarda claves iguales (la validación ya dejó un solo valor).</li>
+                  <li><code>pasos.append({</code> anota la comparación (valor, nodo comparado, operador y dirección) para animarla.</li>
+                  <li><code>if hijo is None:</code> el hijo elegido no existe: encontramos el hueco.</li>
+                  <li><code>nuevo = Nodo(valor)</code> crea el nodo nuevo.</li>
+                  <li><code>actual.izquierdo = nuevo</code> lo enlaza como hijo izquierdo (si el lado es el derecho, se usa <code>actual.derecho</code>).</li>
+                  <li><code>actual = hijo</code> si el hijo sí existe, se baja a él y se repite la comparación.</li>
+                  <li><code>return pasos</code> entrega el registro para que Flask lo envíe al navegador.</li>
+                </ul>
+              </section>
+            </div>
+            <h4>Ejemplo de ejecución</h4>
+            <p>Resultado real de insertar el 20 en un árbol que ya tiene 50, 30 y 70:</p>
+            <pre class="salida">{{ ejemplo.insercion }}</pre>
+            <div class="exposicion"><p>«Para insertar un número empezamos en la raíz y comparamos. Si es menor vamos a la izquierda; si es mayor, a la derecha. Seguimos bajando hasta encontrar un espacio vacío y allí creamos el nodo. Por eso el orden en que se ingresan los números cambia la forma del árbol.»</p></div>
+          </article>
+
+          <!-- 4. Inorden -->
+          <article class="bloque" id="bloque-inorden" hidden>
+            <h3>4. El recorrido Inorden</h3>
+            <p class="origen">Archivo arbol.py, métodos ArbolABB.inorden y ArbolABB._inorden</p>
+            <pre class="codigo"><code>{{ codigo.inorden }}</code></pre>
+            <div class="bloque-cols">
+              <section>
+                <h4>Qué hace</h4>
+                <p>Visita todos los nodos en el orden Izquierda → Raíz → Derecha y guarda los valores en una lista. <code>inorden()</code> prepara la lista vacía y llama a <code>_inorden</code>, que es recursiva (se llama a sí misma): primero recorre todo el subárbol izquierdo, después agrega el valor del nodo y al final recorre el subárbol derecho.</p>
+                <h4>Por qué es necesario</h4>
+                <p>Es lo que produce el resultado ascendente que exige el proyecto. No se usa ninguna función de ordenamiento: el orden aparece solo porque, en un ABB, todo lo de la izquierda es menor y todo lo de la derecha es mayor.</p>
+              </section>
+              <section>
+                <h4>Instrucciones importantes</h4>
+                <ul class="lineas">
+                  <li><code>resultado = []</code> lista donde se irán guardando los valores visitados.</li>
+                  <li><code>self._inorden(self.raiz, resultado)</code> empieza el recorrido desde la raíz.</li>
+                  <li><code>if nodo is None:</code> caso base: si no hay nodo (subárbol vacío) no hay nada que visitar y la función termina.</li>
+                  <li><code>self._inorden(nodo.izquierdo, resultado)</code> 1) Izquierda: recorre todo el subárbol izquierdo.</li>
+                  <li><code>resultado.append(nodo.valor)</code> 2) Raíz: «visita» el nodo agregando su valor al final de la lista.</li>
+                  <li><code>self._inorden(nodo.derecho, resultado)</code> 3) Derecha: recorre todo el subárbol derecho.</li>
+                  <li><code>return resultado</code> devuelve la lista ya ordenada de menor a mayor.</li>
+                </ul>
+              </section>
+            </div>
+            <h4>Ejemplo de ejecución</h4>
+            <pre class="salida">Para el árbol de 50, 30, 70, 20, 40, 60, 80, inorden() devuelve:
+{{ ejemplo.inorden_resultado }}
+
+Cómo se llega a ese resultado: se baja por la izquierda hasta el 20 (no tiene hijos) y se agrega;
+se sube al 30 y se agrega; se baja al 40 y se agrega; se sube a la raíz 50 y se agrega;
+luego se repite lo mismo con el subárbol derecho (60, 70 y 80).</pre>
+            <div class="exposicion"><p>«El recorrido Inorden es recursivo: primero la izquierda, luego la raíz, luego la derecha. Como los menores están a la izquierda y los mayores a la derecha, los valores salen ordenados sin usar ninguna función de ordenamiento.»</p></div>
+          </article>
+
+          <!-- 5. Pasos para la animación -->
+          <article class="bloque" id="bloque-pasos" hidden>
+            <h3>5. Generación de pasos para la animación</h3>
+            <p class="origen">Archivo arbol.py, métodos ArbolABB.generar_pasos_inorden y ArbolABB._pasos_inorden</p>
+            <pre class="codigo"><code>{{ codigo.pasos }}</code></pre>
+            <div class="bloque-cols">
+              <section>
+                <h4>Qué hace</h4>
+                <p>Hace el mismo recorrido que <code>inorden()</code>, pero en vez de guardar solo los valores anota cada movimiento como un paso: <b>bajar</b> (llegamos a un nodo), <b>visitar</b> (el valor entra en el resultado) y <b>subir</b> (terminamos un subárbol y regresamos al padre). Al final agrega un paso <b>fin</b>. Cada paso lleva un mensaje explicativo.</p>
+                <p>Los pasos de la inserción se generan dentro de <code>insertar</code> (bloque 3).</p>
+                <h4>Por qué es necesario</h4>
+                <p>JavaScript no debe repetir el algoritmo. Python decide qué ocurre en cada momento y el navegador solo lo reproduce. Además, la ruta <code>/api/inorden</code> comprueba que los nodos «visitados» sean exactamente los que devuelve <code>inorden()</code>.</p>
+              </section>
+              <section>
+                <h4>Instrucciones importantes</h4>
+                <ul class="lineas">
+                  <li><code>pasos = []</code> lista de eventos que se enviará al navegador.</li>
+                  <li><code>self._pasos_inorden(self.raiz, None, None, pasos)</code> inicia en la raíz (no tiene padre ni lado).</li>
+                  <li><code>"tipo": "bajar",</code> llegamos a un nodo desde su padre.</li>
+                  <li><code>self._pasos_inorden(nodo.izquierdo, nodo, "izquierdo", pasos)</code> 1) Izquierda: recorre (y anota) el subárbol izquierdo.</li>
+                  <li><code>"tipo": "subir",</code> terminó el subárbol de un hijo: regresamos a su padre.</li>
+                  <li><code>"tipo": "visitar",</code> 2) Raíz: aquí el valor entra en el resultado.</li>
+                  <li><code>self._pasos_inorden(nodo.derecho, nodo, "derecho", pasos)</code> 3) Derecha: recorre (y anota) el subárbol derecho.</li>
+                  <li><code>pasos.append({"tipo": "fin", "mensaje": texto})</code> último paso: el recorrido terminó.</li>
+                </ul>
+              </section>
+            </div>
+            <h4>Ejemplo de ejecución</h4>
+            <p>Primeros pasos reales del recorrido del árbol de ejemplo:</p>
+            <pre class="salida">{{ ejemplo.inorden_pasos }}</pre>
+            <p>Así viaja un paso de inserción dentro del JSON (el primer paso de insertar el 20):</p>
+            <pre class="salida">{{ ejemplo.paso_json }}</pre>
+            <div class="exposicion"><p>«Python genera una lista de pasos: bajar, visitar y subir. JavaScript solo lee esa lista y la dibuja; no vuelve a calcular nada del árbol.»</p></div>
+          </article>
+
+          <!-- 6. Dibujo SVG -->
+          <article class="bloque" id="bloque-dibujo" hidden>
+            <h3>6. El dibujo SVG</h3>
+            <p class="origen">Archivo static/js/app.js, función dibujarArbol</p>
+            <pre class="codigo"><code>{{ codigo.dibujo }}</code></pre>
+            <div class="bloque-cols">
+              <section>
+                <h4>Qué hace</h4>
+                <p><code>dibujarArbol</code> recibe la lista de nodos que calculó Python (cada uno con su valor, nivel y columna) y crea los elementos SVG: una línea por cada arista y un rectángulo redondeado con el número por cada nodo. La columna horizontal de un nodo es su lugar en el recorrido Inorden; la fila es su nivel.</p>
+                <h4>Por qué es necesario</h4>
+                <p>El dibujo se genera por programa a partir de los datos reales del árbol; no es una imagen hecha a mano. Así cambia con cada entrada y siempre representa el árbol de Python. Las aristas se crean antes que los nodos para que queden detrás de ellos.</p>
+              </section>
+              <section>
+                <h4>Instrucciones importantes</h4>
+                <ul class="lineas">
+                  <li><code>svg.replaceChildren();</code> borra el dibujo anterior antes de dibujar el árbol nuevo.</li>
+                  <li><code>svg.append(capaAristas, capaNodos);</code> crea dos capas: primero las líneas y encima los nodos.</li>
+                  <li><code>n.x = MARGEN + anchoMax / 2 + n.posicion * sepH;</code> posición horizontal: la columna (que entrega Python) por la separación entre columnas.</li>
+                  <li><code>n.y = MARGEN + ALTO_NODO / 2 + n.nivel * SEP_VERTICAL;</code> posición vertical: el nivel (que entrega Python) por la separación entre niveles.</li>
+                  <li><code>const linea = crearSVG("line", { x1: p.x, y1: p.y, x2: n.x, y2: n.y }, "arista");</code> una línea desde el centro del padre hasta el centro del hijo.</li>
+                  <li><code>const forma = crearSVG("rect", {</code> el nodo: un rectángulo con esquinas muy redondeadas (se ve como círculo con números cortos).</li>
+                  <li><code>svg.setAttribute("viewBox", `0 0 ${ancho} ${alto}`);</code> define el sistema de coordenadas: el SVG se escala sin deformarse.</li>
+                </ul>
+              </section>
+            </div>
+            <h4>Ejemplo de ejecución</h4>
+            <p>Datos reales que entrega Python (una línea por nodo; se muestran los tres primeros):</p>
+            <pre class="salida">{{ ejemplo.nodos_json }}</pre>
+            <p>El 20 está en el nivel 2 (tercera fila) y en la columna 0 (la primera): se dibuja abajo a la izquierda, con una arista que lo une a su padre, el 30.</p>
+            <div class="exposicion"><p>«El árbol se dibuja con SVG. Python entrega, para cada nodo, su nivel y su columna; JavaScript los convierte en coordenadas y crea los círculos y las líneas.»</p></div>
+          </article>
+
+          <!-- 7. Comunicación -->
+          <article class="bloque" id="bloque-comunicacion" hidden>
+            <h3>7. Python, Flask y JavaScript</h3>
+            <p class="origen">Archivos app.py (ruta_construir) y static/js/app.js (construirArbol)</p>
+            <p class="titulo-codigo">app.py: ruta_construir</p>
+            <pre class="codigo"><code>{{ codigo.ruta_construir }}</code></pre>
+            <p class="titulo-codigo">static/js/app.js: pedirJSON y construirArbol</p>
+            <pre class="codigo"><code>{{ codigo.js_comunicacion }}</code></pre>
+            <div class="bloque-cols">
+              <section>
+                <h4>Qué hace</h4>
+                <p>Flask es el puente. El navegador hace una petición a una ruta (por ejemplo <code>POST /api/construir</code>) enviando en un JSON el texto escrito. Python lo valida, construye el árbol y responde con otro JSON: el árbol y los pasos de inserción. JavaScript lee ese JSON y lo dibuja.</p>
+                <p>Hay tres rutas de datos: <code>/api/construir</code>, <code>/api/inorden</code> y <code>/api/reiniciar</code>; la ruta <code>/</code> muestra la página.</p>
+                <h4>Por qué es necesario</h4>
+                <p>Permite que toda la lógica viva en Python y que la interfaz sea solo visual. JSON es un formato de texto que entienden ambos lenguajes.</p>
+              </section>
+              <section>
+                <h4>Instrucciones importantes</h4>
+                <ul class="lineas">
+                  <li><code>@app.route("/api/construir", methods=["POST"])</code> declara la ruta; solo acepta peticiones POST.</li>
+                  <li><code>datos = request.get_json(silent=True)</code> lee el JSON enviado por el navegador (si viene mal formado, devuelve None).</li>
+                  <li><code>valores, errores, avisos = validar_entrada(str(datos.get("texto", "")))</code> valida el texto (bloque 8).</li>
+                  <li><code>return jsonify({"ok": False, "errores": errores}), 400</code> si hay errores, responde con los mensajes y NO construye nada.</li>
+                  <li><code>pasos = arbol.construir(valores)</code> Python construye el árbol y genera los pasos de inserción.</li>
+                  <li><code>estado["arbol"] = arbol</code> recuerda el árbol para poder pedir después el recorrido Inorden.</li>
+                  <li><code>return jsonify({"ok": True, "valores": valores, "arbol": resumen, "pasos_insercion": pasos, "avisos": avisos})</code> responde con el árbol, los pasos y los avisos (por ejemplo, repetidos ignorados) en formato JSON.</li>
+                  <li><code>const respuesta = await fetch(url, opciones);</code> el navegador pide datos al servidor.</li>
+                  <li><code>return respuesta.json();</code> convierte la respuesta JSON en objetos de JavaScript.</li>
+                  <li><code>if (!datos.ok) {</code> Python rechazó la entrada: se muestran los errores y no se dibuja nada nuevo.</li>
+                </ul>
+              </section>
+            </div>
+            <h4>Ejemplo de ejecución</h4>
+            <pre class="salida">Navegador → Flask:   POST /api/construir   {"texto": "50, 30, 70"}
+Flask → Navegador:   {{ ejemplo.respuesta_json }}</pre>
+            <div class="exposicion"><p>«El navegador le manda a Flask los números en un JSON; Python valida y construye el árbol y responde con otro JSON. JavaScript solo dibuja lo que recibe.»</p></div>
+          </article>
+
+          <!-- 8. Validación -->
+          <article class="bloque" id="bloque-validacion" hidden>
+            <h3>8. La validación de datos</h3>
+            <p class="origen">Archivo app.py, función validar_entrada</p>
+            <pre class="codigo"><code>{{ codigo.validacion }}</code></pre>
+            <div class="bloque-cols">
+              <section>
+                <h4>Qué hace</h4>
+                <p>Convierte el texto en una lista de enteros y detecta: entrada vacía, menos de 2 números, caracteres no numéricos, decimales, y enteros fuera del rango seguro de JavaScript. Junta todos los problemas en mensajes claros; si hay alguno, el árbol no se construye. Los valores repetidos no son un error: se toma uno solo (el primero que aparece) y se avisa cuáles eran.</p>
+                <h4>Por qué es necesario</h4>
+                <p>Un dato mal escrito produciría un árbol incorrecto o un error. Como un ABB no guarda claves iguales, los repetidos se reducen a uno solo y se avisa cuáles eran, para no eliminar datos en silencio. El límite ±9007199254740991 existe porque JavaScript solo representa enteros hasta ese valor sin perder precisión.</p>
+              </section>
+              <section>
+                <h4>Instrucciones importantes</h4>
+                <ul class="lineas">
+                  <li><code>partes = [p for p in re.split(r"[,;\s]+", texto) if p != ""]</code> separa el texto por comas, punto y coma, espacios o saltos de línea, y descarta los trozos vacíos.</li>
+                  <li><code>if len(partes) == 0:</code> la entrada está vacía: se responde de inmediato.</li>
+                  <li><code>if re.fullmatch(r"[+-]?[0-9]+", parte):</code> es un entero válido: signo opcional y solo dígitos.</li>
+                  <li><code>if len(digitos) &gt; 16:</code> con más de 16 cifras seguro se pasa del límite; se evita convertirlo.</li>
+                  <li><code>numero = signo * int(digitos or "0")</code> convierte el texto en número entero (si no quedan dígitos, es 0).</li>
+                  <li><code>if abs(numero) &gt; LIMITE_JS:</code> revisa el rango seguro de JavaScript.</li>
+                  <li><code>elif re.fullmatch(r"[+-]?([0-9]+\.[0-9]*|\.[0-9]+)", parte):</code> reconoce los decimales, como 3.5, para rechazarlos.</li>
+                  <li><code>veces[numero] = veces.get(numero, 0) + 1</code> cuenta cuántas veces aparece cada número para detectar repetidos.</li>
+                  <li><code>valores = list(veces)</code> se queda con cada número una sola vez, en el orden en que apareció por primera vez.</li>
+                  <li><code>if len(partes) &lt; 2:</code> comprueba el mínimo de 2 números.</li>
+                  <li><code>return valores, errores, avisos</code> devuelve los números, los errores y los avisos; si hay errores, no se construye el árbol.</li>
+                </ul>
+              </section>
+            </div>
+            <h4>Ejemplo de ejecución</h4>
+            <pre class="salida">{{ ejemplo.validacion_mala }}
+
+{{ ejemplo.validacion_buena }}
+
+{{ ejemplo.validacion_repetida }}</pre>
+            <div class="exposicion"><p>«Antes de construir nada se valida la entrada: los separadores, que sean enteros, el mínimo de dos números y el rango. Si algo falla se muestra un mensaje claro y no se construye el árbol; si hay repetidos, se toma uno solo y se avisa.»</p></div>
+          </article>
+
+          <!-- 9. Control de animaciones -->
+          <article class="bloque" id="bloque-control" hidden>
+            <h3>9. Control de las animaciones</h3>
+            <p class="origen">Archivo static/js/app.js, clase Reproductor</p>
+            <pre class="codigo"><code>{{ codigo.reproductor }}</code></pre>
+            <div class="bloque-cols">
+              <section>
+                <h4>Qué hace</h4>
+                <p>La clase <code>Reproductor</code> controla una lista de pasos (los de inserción o los de Inorden). Recuerda en qué paso va (<code>indice</code>) y en qué estado está: <code>vacio</code>, <code>detenido</code>, <code>reproduciendo</code>, <code>pausado</code> o <code>completo</code>. Los botones llaman a sus métodos: reproducir, pausar, continuar, siguiente, anterior, reiniciar y mostrar todo.</p>
+                <p>Cada vez que cambia el paso llama a <code>alMostrar</code> (dibuja ese paso) y a <code>alCambiar</code> (actualiza botones y textos).</p>
+                <h4>Por qué es necesario</h4>
+                <p>El mismo código sirve para las dos animaciones. Como el dibujo de cada paso depende solo del número de paso, «Paso anterior» y «Reiniciar» funcionan sin recalcular nada. Además, <code>generacion</code> evita que queden temporizadores viejos al construir otro árbol: nunca hay dos animaciones a la vez.</p>
+              </section>
+              <section>
+                <h4>Instrucciones importantes</h4>
+                <ul class="lineas">
+                  <li><code>this.indice = -1;</code> todavía no se muestra ningún paso (el árbol aparece vacío).</li>
+                  <li><code>this.estado = "vacio";</code> el reproductor empieza sin pasos cargados.</li>
+                  <li><code>this.generacion = 0;</code> contador que sube cada vez que se cargan pasos nuevos.</li>
+                  <li><code>this.generacion++;</code> invalida cualquier temporizador que haya quedado pendiente.</li>
+                  <li><code>clearTimeout(this.temporizador);</code> cancela el siguiente paso programado (así funciona Pausar).</li>
+                  <li><code>irA(indice) {</code> salta a un paso y deja la animación en pausa (lo usan Siguiente, Anterior, Reiniciar y Mostrar completo).</li>
+                  <li><code>this.temporizador = setTimeout(() =&gt; {</code> programa el siguiente paso para cuando pase el tiempo elegido en «Velocidad».</li>
+                  <li><code>if (generacion !== this.generacion || this.estado !== "reproduciendo") return;</code> si cambió el árbol o se pausó, el temporizador viejo no hace nada.</li>
+                </ul>
+              </section>
+            </div>
+            <h4>Ejemplo de ejecución</h4>
+            <pre class="salida">Ejemplo con 20 pasos:
+cargar(20)      estado = detenido        indice = -1
+reproducir()    estado = reproduciendo   indice = 0, 1, 2, ... (un paso cada «velocidad» ms)
+pausar()        estado = pausado         se cancela el temporizador
+siguiente()     estado = pausado         indice aumenta en 1
+mostrarTodo()   estado = completo        indice = 19
+cargar(...)     generacion + 1           los temporizadores anteriores quedan inválidos</pre>
+            <div class="exposicion"><p>«El Reproductor guarda el número de paso y un estado. Cada botón cambia eso y la pantalla se dibuja a partir del paso actual; por eso se puede pausar, retroceder o reiniciar sin que se mezclen animaciones.»</p></div>
+          </article>
+
+          <!-- 10. Resultado ascendente -->
+          <article class="bloque" id="bloque-ascendente" hidden>
+            <h3>10. Obtención del resultado ascendente</h3>
+            <p class="origen">Archivos app.py (ruta_inorden) y static/js/app.js (valoresVisitados)</p>
+            <p class="titulo-codigo">app.py: ruta_inorden</p>
+            <pre class="codigo"><code>{{ codigo.ruta_inorden }}</code></pre>
+            <p class="titulo-codigo">static/js/app.js: textoSecuencia y valoresVisitados</p>
+            <pre class="codigo"><code>{{ codigo.js_resultado }}</code></pre>
+            <div class="bloque-cols">
+              <section>
+                <h4>Qué hace</h4>
+                <p>Cuando termina la inserción, el navegador pide <code>GET /api/inorden</code>. Python ejecuta <code>arbol.inorden()</code> (el resultado ascendente), genera los pasos y comprueba que los nodos «visitados» sean exactamente los de <code>inorden()</code>.</p>
+                <p>JavaScript va agregando al resultado solo los valores de los pasos <code>visitar</code> que ya ocurrieron. Al llegar al paso <code>fin</code> muestra la lista completa que entregó Python.</p>
+                <h4>Por qué es necesario</h4>
+                <p>Demuestra que el orden sale del recorrido del ABB y no de una función de ordenamiento: el proyecto no usa <code>sort()</code> ni <code>sorted()</code>, y el resultado es consecuencia del recorrido Inorden.</p>
+              </section>
+              <section>
+                <h4>Instrucciones importantes</h4>
+                <ul class="lineas">
+                  <li><code>@app.route("/api/inorden")</code> ruta que el navegador consulta al terminar la inserción.</li>
+                  <li><code>resultado = arbol.inorden()</code> lista ascendente que sale del recorrido, sin ordenar.</li>
+                  <li><code>pasos = arbol.generar_pasos_inorden()</code> eventos para animar el recorrido.</li>
+                  <li><code>visitados = [paso["valor"] for paso in pasos if paso["tipo"] == "visitar"]</code> valores que visita la animación, en el orden en que los visita.</li>
+                  <li><code>if visitados != resultado:</code> comprobación de seguridad: la animación debe coincidir exactamente con <code>inorden()</code>.</li>
+                  <li><code>return jsonify({"ok": True, "resultado": resultado, "pasos": pasos})</code> envía al navegador el resultado y los pasos.</li>
+                  <li><code>return valores.join(" → ");</code> une los valores con flechas para mostrarlos.</li>
+                  <li><code>if (pasos[i].tipo === "visitar") lista.push(pasos[i].valor);</code> solo los pasos «visitar» agregan un valor al resultado visible.</li>
+                </ul>
+              </section>
+            </div>
+            <h4>Ejemplo de ejecución</h4>
+            <pre class="salida">Resultado que devuelve inorden() para 50, 30, 70, 20, 40, 60, 80:
+{{ ejemplo.inorden_resultado }}
+
+Lo que ve el usuario mientras corre la animación:
+20
+20 → 30
+20 → 30 → 40
+...
+20 → 30 → 40 → 50 → 60 → 70 → 80</pre>
+            <div class="exposicion"><p>«El resultado ascendente sale directamente del método inorden(). La animación lo va mostrando valor por valor y, al final, coincide exactamente con lo que calculó Python.»</p></div>
+          </article>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script id="datos-ejemplos" type="application/json">{{ ejemplo.arboles | tojson }}</script>
+<script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>
