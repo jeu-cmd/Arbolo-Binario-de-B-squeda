@@ -29,13 +29,10 @@ CARPETA = Path(__file__).resolve().parent
 LIMITE_JS = 9007199254740991
 
 # Estado del programa: el último árbol construido.
-# (Es una aplicación local de una sola persona, por eso basta una variable.)
 estado = {"arbol": None}
 
 
-# ----------------------------------------------------------------------
-# VALIDACIÓN DE LA ENTRADA
-# ----------------------------------------------------------------------
+# Validacuión de la entrada del usuario: convierte el texto en una lista de enteros.
 def listar(elementos, maximo=8):
     """Une los elementos con comas; si son muchos, resume los que sobran."""
     texto = ", ".join(elementos[:maximo])
@@ -53,12 +50,12 @@ def validar_entrada(texto):
     """
     errores, avisos = [], []
 
-    # 1) Separar por comas, punto y coma, espacios o saltos de línea.
+    # Separar por comas, punto y coma, espacios o saltos de línea.
     partes = [p for p in re.split(r"[,;\s]+", texto) if p != ""]
     if len(partes) == 0:
         return [], ["La entrada está vacía. Escribe al menos 2 números enteros."], []
 
-    # 2) Revisar cada dato y clasificarlo.
+    #Revisar cada dato y clasificarlo.
     valores, no_numericos, decimales, fuera_de_rango = [], [], [], []
     for parte in partes:
         if re.fullmatch(r"[+-]?[0-9]+", parte):                       # entero válido
@@ -87,7 +84,7 @@ def validar_entrada(texto):
     if len(partes) < 2:
         errores.append("Se necesitan al menos 2 números (escribiste 1).")
 
-    # 4) Valores repetidos: se toma uno solo (el primero que aparece) y se avisa cuáles eran.
+    #Valores repetidos: se toma uno solo (el primero que aparece) y se avisa cuáles eran.
     veces = {}
     for numero in valores:
         veces[numero] = veces.get(numero, 0) + 1
@@ -101,9 +98,7 @@ def validar_entrada(texto):
     return valores, errores, avisos
 
 
-# ----------------------------------------------------------------------
-# RUTAS
-# ----------------------------------------------------------------------
+#Rutas
 @app.route("/")
 def ruta_inicio():
     return render_template("index.html", codigo=codigo_de_ayuda(), ejemplo=ejemplos_de_ayuda())
@@ -153,11 +148,9 @@ def ruta_reiniciar():
     return jsonify({"ok": True})
 
 
-# ----------------------------------------------------------------------
-# DATOS REALES PARA LA SECCIÓN «AYUDA Y ALGORITMOS»
+# DATOS REALES PARA LA SECCIÓN AYUDA Y ALGORITMOs
 # (el código y los ejemplos se leen y ejecutan desde los propios archivos,
 #  así la ayuda siempre coincide con lo que de verdad hace el programa)
-# ----------------------------------------------------------------------
 def codigo_python(*objetos):
     """Código fuente REAL de clases, métodos o funciones (se lee con inspect)."""
     return "\n\n".join(textwrap.dedent(inspect.getsource(o)).rstrip() for o in objetos)

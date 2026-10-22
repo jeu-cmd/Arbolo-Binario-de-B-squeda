@@ -1,12 +1,10 @@
-/* ==========================================================================
-   styles.css - Diseño de la aplicación del Árbol Binario de Búsqueda
+/* styles.css - Diseño de la aplicación del Árbol Binario de Búsqueda
 
    Idea visual: una hoja cuadriculada (papel de matemáticas) y marcadores de
    colores. Los únicos colores intensos son los estados del árbol:
      violeta = valor que se inserta     ámbar = nodo que se compara
      azul    = nodo que se visita       verde = nodo ya visitado
-     gris    = nodo pendiente de visitar
-   ========================================================================== */
+     gris    = nodo pendiente de visitar*/
 
 :root {
   --tinta: #16264a;
@@ -105,7 +103,7 @@ h1, h2, h3, h4 { line-height: 1.25; }
 .menu-item.activo { background: rgba(255, 255, 255, .13); color: #fff; box-shadow: inset 3px 0 0 var(--compara); }
 .pie-lateral { margin: auto 0 0; padding: 0 .4rem; font-size: .8rem; line-height: 1.4; color: #8ea0c8; }
 
-/* ---------- Barra superior compacta ---------- */
+/*Barra superior compacta*/
 .barra {
   display: flex;
   align-items: center;
@@ -138,12 +136,12 @@ h1, h2, h3, h4 { line-height: 1.25; }
 .contador { font-size: .88rem; color: var(--suave); }
 .contador b { margin-left: .2rem; font-size: 1.05rem; color: var(--texto); }
 
-/* ---------- Paneles ---------- */
+/* Paneles*/
 .panel { background: var(--hoja); border: 1px solid var(--borde); border-radius: .5rem; }
 .panel-cab { display: flex; align-items: center; gap: .7rem; }
 .panel-cab h2 { margin: 0 auto 0 0; font: 700 1.05rem var(--f-titulo); }
 
-/* ---------- Pantalla de trabajo ---------- */
+/*  Pantalla de trabajo  */
 .vista-arbol {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
@@ -344,7 +342,7 @@ h1, h2, h3, h4 { line-height: 1.25; }
 .secuencia { font-size: 1rem; font-weight: 700; color: var(--visitado); overflow-wrap: anywhere; }
 .comparacion { font-size: 1.05rem; font-weight: 700; }
 
-/* ---------- Árbol: nodos y aristas (SVG) ---------- */
+/* Árbol: nodos y aristas (SVG)  */
 .arista {
   fill: none;
   stroke: #6f7f9e;
@@ -391,7 +389,7 @@ h1, h2, h3, h4 { line-height: 1.25; }
 .nodo.visitando .numero { fill: #fff; }
 .nodo.cursor .forma { stroke: var(--visita); stroke-width: 4.5; }
 
-/* ---------- ¿Qué es un ABB? ---------- */
+/*¿Qué es un ABB?  */
 .vista-teoria { overflow: auto; padding: .9rem 1.1rem; }
 .teoria { columns: 2 25rem; column-gap: .9rem; }
 .tarjeta { break-inside: avoid; margin: 0 0 .9rem; padding: .9rem 1.1rem; background: var(--hoja); border: 1px solid var(--borde); border-radius: .5rem; }
@@ -410,7 +408,7 @@ h1, h2, h3, h4 { line-height: 1.25; }
 .formula { padding: .4rem .7rem; border-left: 4px solid var(--tinta); background: #f1f4fa; font-family: var(--f-codigo); font-size: .88rem; }
 .recorrido { font-weight: 700; color: var(--visitado); }
 
-/* ---------- Ayuda y algoritmos ---------- */
+/* Ayuda y algoritmos */
 .vista-ayuda {
   display: grid;
   grid-template-columns: 16.5rem minmax(0, 1fr);
@@ -478,7 +476,7 @@ h1, h2, h3, h4 { line-height: 1.25; }
   .nodo, .arista, .nodo .forma, .nodo .numero, .barra-progreso i { transition-duration: .01ms !important; }
 }
 
-/* ---------- Pantallas pequeñas: se permite desplazamiento vertical ---------- */
+/*Pantallas pequeñas: se permite desplazamiento vertical */
 @media (max-width: 1000px) {
   html, body { height: auto; }
   .app { display: block; height: auto; }

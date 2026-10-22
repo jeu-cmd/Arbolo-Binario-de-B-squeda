@@ -1,14 +1,12 @@
 "use strict";
 
-/* ==========================================================================
-   app.js - Interfaz del Árbol Binario de Búsqueda
+/* app.js - Interfaz del Árbol Binario de Búsqueda
 
    Este archivo NO implementa el árbol. Le pide a Python (Flask) los datos y los
    pasos de inserción / recorrido, y se limita a:
      1) dibujar esos datos con SVG,
      2) controlar la reproducción de las animaciones,
-     3) mostrar mensajes y resultados.
-   ========================================================================== */
+     3) mostrar mensajes y resultados. */
 
 const $ = (id) => document.getElementById(id);
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -66,9 +64,7 @@ function crearSVG(nombre, atributos = {}, clase = "") {
   return nodo;
 }
 
-/* ==========================================================================
-   1) DIBUJO DEL ÁRBOL EN SVG
-   ========================================================================== */
+/* Dibujo del árbol en SVG */
 
 // [AYUDA: dibujo]
 const ALTO_NODO = 34;        // alto de cada nodo (unidades del SVG)
@@ -148,9 +144,7 @@ function ajustarEscala() {
   el.svg.style.height = `${dibujo.alto * escala}px`;
 }
 
-/* ==========================================================================
-   2) REPRODUCTOR DE ANIMACIONES (sirve para la inserción y para el Inorden)
-   ========================================================================== */
+/* Reproductor de animaciones */
 
 // [AYUDA: reproductor]
 class Reproductor {
@@ -250,9 +244,7 @@ class Reproductor {
 }
 // [/AYUDA]
 
-/* ==========================================================================
-   3) CÓMO SE VE CADA PASO (solo interpreta lo que generó Python)
-   ========================================================================== */
+/* como se ve cada paso */
 
 function ponerMensaje(texto) {
   el.resMensaje.textContent = texto;
@@ -406,9 +398,7 @@ function mostrarInorden(k) {
   }
 }
 
-/* ==========================================================================
-   4) PANELES DE CONTROL Y ESTADOS
-   ========================================================================== */
+/* Paneles de control y estados */
 
 const ETIQUETAS = { vacio: "Sin datos", detenido: "Listo", reproduciendo: "Reproduciendo", pausado: "En pausa", completo: "Completo" };
 const TONOS = { vacio: "neutro", detenido: "neutro", reproduciendo: "activo", pausado: "aviso", completo: "ok" };
@@ -491,9 +481,7 @@ function enlazarControles(prefijo, rep) {
   enlazar("completo", () => rep.mostrarTodo());
 }
 
-/* ==========================================================================
-   5) COMUNICACIÓN CON PYTHON (Flask)
-   ========================================================================== */
+/* Comunicación con Python (Flask) */
 
 // [AYUDA: comunicacion]
 async function pedirJSON(url, opciones = {}) {
@@ -617,9 +605,7 @@ async function limpiar() {
   }
 }
 
-/* ==========================================================================
-   6) NAVEGACIÓN Y SECCIONES DE AYUDA
-   ========================================================================== */
+/* Navegación y secciones de ayuda */
 
 function mostrarVista(nombre) {
   document.querySelectorAll(".vista").forEach((vista) => { vista.hidden = vista.id !== `vista-${nombre}`; });
@@ -660,9 +646,7 @@ function dibujarEjemplos() {
   mostrarTodo(dibujarArbol($("svg-ej-degenerado"), datos.degenerado));
 }
 
-/* ==========================================================================
-   7) ARRANQUE
-   ========================================================================== */
+/* Arranque*/
 
 function iniciar() {
   el.btnConstruir.addEventListener("click", alPulsarConstruir);

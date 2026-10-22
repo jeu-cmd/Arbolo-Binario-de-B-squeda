@@ -28,9 +28,8 @@ class ArbolABB:
     def __init__(self):
         self.raiz = None         # árbol vacío: todavía no hay raíz
 
-    # ------------------------------------------------------------------
-    # INSERTAR
-    # ------------------------------------------------------------------
+    
+    #Insertar
     def insertar(self, valor):
         """
         Inserta `valor` respetando la regla del ABB:
@@ -111,9 +110,7 @@ class ArbolABB:
         })
         return pasos
 
-    # ------------------------------------------------------------------
-    # BUSCAR
-    # ------------------------------------------------------------------
+    #buscar
     def buscar(self, valor):
         """Busca `valor` con la misma regla del ABB. Devuelve True si está en el árbol."""
         actual = self.raiz
@@ -123,9 +120,7 @@ class ArbolABB:
             actual = actual.izquierdo if valor < actual.valor else actual.derecho
         return False
 
-    # ------------------------------------------------------------------
-    # RECORRIDO INORDEN: Izquierda -> Raíz -> Derecha
-    # ------------------------------------------------------------------
+    #Recorrido Inorden 
     def inorden(self):
         """Devuelve los valores del árbol en orden ascendente (recorrido Inorden)."""
         resultado = []
@@ -207,9 +202,8 @@ class ArbolABB:
                 "mensaje": f"Terminamos el subárbol de {nodo.derecho.valor}: regresamos a su padre {nodo.valor}.",
             })
 
-    # ------------------------------------------------------------------
-    # CÁLCULOS DEL ÁRBOL
-    # ------------------------------------------------------------------
+    
+    # calculos del arbol
     def contar_nodos(self):
         """Cantidad de nodos del árbol."""
         return self._contar(self.raiz)
@@ -228,9 +222,7 @@ class ArbolABB:
             return 0
         return 1 + max(self._altura(nodo.izquierdo), self._altura(nodo.derecho))
 
-    # ------------------------------------------------------------------
-    # DATOS PARA DIBUJAR EL ÁRBOL
-    # ------------------------------------------------------------------
+    #Datos para dibujar el árbol en la interfaz
     def obtener_nodos(self):
         """
         Lista con los datos que el navegador necesita para dibujar cada nodo:
